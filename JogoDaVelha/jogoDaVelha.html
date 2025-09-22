@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 15px;
+            color: #e94560;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.7);
+        }
+        
+        #status {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            min-height: 30px;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        #tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            height: 300px;
+            width: 300px;
+            margin-bottom: 15px;
+            background-color: #0f3460;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .celula {
+            background-color: #1a1a2e;
+            border: 2px solid #e94560;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .celula:hover {
+            background-color: #16213e;
+        }
+        
+        .celula.X { color: #4cc9f0; }
+        .celula.O { color: #f72585; }
+        
+        #reiniciar {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #e94560;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #reiniciar:hover {
+            background-color: #f72585;
+        }
+        
+        .vencedor {
+            background-color: rgba(76, 201, 240, 0.2);
+            animation: pulsar 0.5s infinite;
+        }
+        
+        @keyframes pulsar {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Velha</h1>
+    <div id="status">Vez do jogador: X</div>
+    <div id="tabuleiro"></div>
+    <button id="reiniciar">Reiniciar</button>
+
+    <script>
+        // Elementos do DOM
+        const tabuleiroElemento = document.getElementById('tabuleiro');
+        const statusElemento = document.getElementById('status');
+        const botaoReiniciar = document.getElementById('reiniciar');
+        
+        // Estado do jogo
+        let tabuleiro = ['', '', '', '', '', '', '', '', ''];
+        let jogadorAtual = 'X';
+        let jogoAtivo = true;
+        
+        // Combinações vencedoras
+        const combinacoes = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
+            [0, 4, 8], [2, 4, 6]             // Diagonais
+        ];
+        
+        // Inicializar o tabuleiro
+        function inicializar() {
+            tabuleiroElemento.innerHTML = '';
+            tabuleiro = ['', '', '', '', '', '', '', '', ''];
+            jogadorAtual = 'X';
+            jogoAtivo = true;
+            statusElemento.textContent = 'Vez do jogador: X';
+            
+            for (let i = 0; i < 9; i++) {
+                const celula = document.createElement('div');
+                celula.className = 'celula';
+                celula.addEventListener('click', () => jogar(i));
+                tabuleiroElemento.appendChild(celula);
+            }
+        }
+        
+        // Processar jogada
+        function jogar(i) {
+            if (!jogoAtivo || tabuleiro[i] !== '') return;
+            
+            tabuleiro[i] = jogadorAtual;
+            const celulas = document.querySelectorAll('.celula');
+            celulas[i].textContent = jogadorAtual;
+            celulas[i].classList.add(jogadorAtual);
+            
+            if (verificarVitoria()) {
+                statusElemento.textContent = `Jogador ${jogadorAtual} venceu!`;
+                jogoAtivo = false;
+                return;
+            }
+            
+            if (!tabuleiro.includes('')) {
+                statusElemento.textContent = 'Empate!';
+                jogoAtivo = false;
+                return;
+            }
+            
+            jogadorAtual = jogadorAtual === 'X' ? 'O' : 'X';
+            statusElemento.textContent = `Vez do jogador: ${jogadorAtual}`;
+        }
+        
+        // Verificar vitória
+        function verificarVitoria() {
+            for (const [a, b, c] of combinacoes) {
+                if (tabuleiro[a] && tabuleiro[a] === tabuleiro[b] && tabuleiro[a] === tabuleiro[c]) {
+                    // Destacar células vencedoras
+                    const celulas = document.querySelectorAll('.celula');
+                    celulas[a].classList.add('vencedor');
+                    celulas[b].classList.add('vencedor');
+                    celulas[c].classList.add('vencedor');
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Event listeners
+        botaoReiniciar.addEventListener('click', inicializar);
+        
+        // Iniciar o jogo
+        inicializar();
+    </script>
+</body>
+</html>
