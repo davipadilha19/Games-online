@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong</title>
+
+    <style>
+        *{
+			margin:0;
+			padding:0;
+		}
+		body, html{
+			color:#fff;
+			background-color: #000;
+		}
+		header{
+			display: flex;
+			justify-content: center
+		}
+		#campo{
+			position: relative;
+			bottom:0px;
+			background-color: #3E5A54;
+			width: 100vw;
+			height: 60vh;
+		}
+		#player{
+			background-color: #FEFEFE;
+			height: 20vh;
+			width: 5vw;
+			position: absolute;
+			botton: 10vh;
+			left: 10vw;
+		}
+		#parede{
+			background-color: #FEFEFE;
+			height: 100%;
+			width: 5vw;
+			position: absolute;
+			botton: 0vh;
+			right: 10vw;
+		}
+		#bolinha {
+		  background-color: #FEFEFE;
+		  height: 20px;
+		  width: 20px;
+		  position: absolute;
+		  top: 50%;
+		  left: 50%;
+		  border-radius: 50%;
+		}
+			
+		
+    </style>
+</head>
+<body>
+	<header>
+        <h1>Pong</h1>
+	</header>
+    <main>
+        <h2>Pontos: </h2>
+        <div id="campo">
+			<div id="player"></div>
+			<div id="parede"></div>
+			<div id="bolinha"></div>
+        </div>
+    </main>
+	<script>
+	let bola = document.getElementById("bolinha");
+let player = document.getElementById("player");
+let pontos = 0;
+
+// posição inicial
+let bolaX = campo.offsetWidth / 2;
+let bolaY = campo.offsetHeight / 2;
+
+let velX = 2; 
+let velY = 2;
+
+function moverBola() {
+  bolaX += velX;
+  bolaY += velY;
+
+  // atualiza posição
+  bola.style.left = bolaX + "px";
+  bola.style.top = bolaY + "px";
+
+  // colisão com o teto e chão
+  if (bolaY <= 0 || bolaY >= campo.offsetHeight - bola.offsetHeight) {
+    velY *= -1;
+  }
+
+  // colisão com o player
+  if (colide(bola, player)) {
+    velX *= -1;
+  }
+
+  // colisão com a parede direita
+  if (bolaX >= campo.offsetWidth - bola.offsetWidth) {
+    velX *= -1;
+    pontos++;
+    document.querySelector("h2").innerText = "Pontos: " + pontos;
+  }
+
+  // se sair pela esquerda -> game over
+  if (bolaX <= 0) {
+    alert("Game Over! Pontos: " + pontos);
+    location.reload();
+  }
+}
+
+setInterval(moverBola, 16); // ~60 fps
+	</script>
+</body>
+</html>

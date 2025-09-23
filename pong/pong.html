@@ -1,37 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pong</title>
 
-    <style>
-        *{
-			margin:0;
-			padding:0;
-		}
-		body, html{
-			color:#fff;
-			background-color: #000;
-		}
-		header{
-			display: flex;
-			justify-content: center
-		}
-		#campo{
-		
-    </style>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      color: #fff;
+      background-color: #000;
+    }
+    header {
+      display: flex;
+      justify-content: center;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #campo {
+      position: relative;
+      background-color: #3E5A54;
+      width: 40vw;
+      height: 50vh;
+      overflow: hidden;
+    }
+    #player {
+      background-color: #FEFEFE;
+      height: 20vh;
+      width: 2vw;
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+    }
+    #parede {
+      background-color: #FEFEFE;
+      height: 100%;
+      width: 2vw;
+      position: absolute;
+      bottom: 0;
+      right: 10px;
+    }
+    #bolinha {
+      background-color: #FEFEFE;
+      height: 20px;
+      width: 20px;
+      position: absolute;
+      border-radius: 50%;
+    }
+    /* Tela de Game Over */
+    #gameOver {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      display: none; /* escondido até dar game over */
+    }
+    #gameOver button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-	<header>
-        <h1>Pong</h1>
-	</header>
-    <main>
-        <h2>Pontos: </h2>
-        <div id="campo">
-			<div id="l1"></div>
-			<div id="l2"></div>
-        </div>
-    </main>
+  <header>
+    <h1>Pong</h1>
+  </header>
+  <main>
+    <h2 id="placar">Pontos: 0</h2>
+    <div id="campo">
+      <div id="player"></div>
+      <div id="parede"></div>
+      <div id="bolinha"></div>
+
+      <!-- Tela de Game Over -->
+      <div id="gameOver">
+        <p id="mensagemFinal">Game Over!</p>
+        <button onclick="reiniciar()">Reiniciar</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const bola = document.getElementById("bolinha");
+    const player = document.getElementById("player");
+    const campo = document.getElementById("campo");
+    const placar = document.getElementById("placar");
+    const gameOverTela = document.getElementById("gameOver");
+    const mensagemFinal = document.getElementById("mensagemFinal");
+
+    let pontos = 0;
+    let bolaX, bolaY, velX, velY;
+    let loop;
+
+    function iniciar() {
+      pontos = 0;
+      placar.innerText = "Pontos: 0";
+
+      bolaX = (campo.offsetWidth / 2) - (bola.offsetWidth / 2);
+      bolaY = (campo.offsetHeight / 2) - (bola.offsetHeight / 2);
+      velX = 3;
+      velY = 3;
+
+      bola.style.left = bolaX + "px";
+      bola.style.top = bolaY + "px";
+
+      gameOverTela.style.display = "none";
+
+      clearInterval(loop);
+      loop = setInterval(moverBola, 16);
+    }
+
+    document.addEventListener("keydown", function(event) {
+      let bottom = parseInt(window.getComputedStyle(player).bottom);
+
+      if (event.key === "w" || event.key === "W") {
+        if (bottom < campo.offsetHeight - player.offsetHeight) {
+          player.style.bottom = (bottom + 20) + "px";
+        }
+      }
+      if (event.key === "s" || event.key === "S") {
+        if (bottom > 0) {
+          player.style.bottom = (bottom - 20) + "px";
+        }
+      }
+    });
+
+    function moverBola() {
+      bolaX += velX;
+      bolaY += velY;
+
+      bola.style.left = bolaX + "px";
+      bola.style.top = bolaY + "px";
+
+      if (bolaY <= 0 || bolaY >= campo.offsetHeight - bola.offsetHeight) {
+        velY *= -1;
+      }
+
+      if (colide(bola, player)) {
+        velX *= -1;
+        velX *= 1.05;
+        velY *= 1.05;
+      }
+
+      if (colide(bola, document.getElementById("parede"))) {
+        velX *= -1;
+        pontos++;
+        placar.innerText = "Pontos: " + pontos;
+      }
+
+      if (bolaX <= 0) {
+        clearInterval(loop);
+        mensagemFinal.innerText = "Game Over! Pontos: " + pontos;
+        gameOverTela.style.display = "flex";
+      }
+    }
+
+    function colide(a, b) {
+      const aTop = a.offsetTop;
+      const aLeft = a.offsetLeft;
+      const aBottom = aTop + a.offsetHeight;
+      const aRight = aLeft + a.offsetWidth;
+
+      const bTop = b.offsetTop;
+      const bLeft = b.offsetLeft;
+      const bBottom = bTop + b.offsetHeight;
+      const bRight = bLeft + b.offsetWidth;
+
+      return !(
+        aBottom < bTop ||
+        aTop > bBottom ||
+        aRight < bLeft ||
+        aLeft > bRight
+      );
+    }
+
+    function reiniciar() {
+      iniciar();
+    }
+
+    iniciar();
+  </script>
 </body>
 </html>
